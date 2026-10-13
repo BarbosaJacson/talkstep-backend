@@ -1,0 +1,125 @@
+@startuml TalkStep_Full_Architecture
+
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+package "Frontend (Celular / PWA - HTML5 & JS)" {
+    class ChatWebInterface {
+        - MediaRecorder audioRecorder
+        - AudioContext audioPlayer
+        + void recordAndSendVoice()
+        + void sendTextMessage(String text)
+        + void renderChatMessage(ChatMessageDTO msg)
+    }
+}
+
+package "Developer Environment" {
+    class IntelliJ_DB_Browser {
+        + runSqlScripts()
+        + inspectTables()
+        + executeDirectQueries()
+    }
+}
+
+package "com.talkstep.api" {
+
+    package "controller" {
+        class ChatController {
+            + ResponseEntity<ChatMessageDTO> sendMessage(Long lessonId, String text)
+            + ResponseEntity<ChatMessageDTO> sendVoiceMessage(Long lessonId, MultipartFile audio)
+        }
+
+        class LessonController {
+            + ResponseEntity<LessonDTO> startLesson(Long topicId)
+            + ResponseEntity<String> finishLesson(Long lessonId)
+            + ResponseEntity<LessonDTO> getPreviousLessonSummary(Long lessonId)
+        }
+
+        class MaterialController {
+            + ResponseEntity<Void> uploadPdfMaterial(MultipartFile file)
+        }
+    }
+
+    package "service" {
+        class TutorEngineService {
+            + ChatMessage processUserMessage(Long lessonId, String userInput)
+            + String generateLessonSummary(Long lessonId)
+        }
+
+        class RagVectorService {
+            + void processAndStorePdf(Material material)
+            + List<MaterialChunk> searchRelevantContext(String query, int topK)
+        }
+
+        class SpeechService {
+            + String transcribeAudio(byte[] audioData)
+            + byte[] synthesizeSpeech(String text)
+        }
+    }
+
+    package "repository" {
+        interface LessonRepository
+        interface ChatMessageRepository
+        interface MaterialRepository
+        interface MaterialChunkRepository
+        interface ItineraryRepository
+    }
+
+    package "domain.entity" {
+        class Itinerary
+        class ModuleTopic
+        class Lesson
+        class ChatMessage
+        class Material
+        class MaterialChunk
+    }
+
+    package "domain.enums" {
+        enum CefrLevel
+        enum LessonStatus
+        enum SenderType
+    }
+}
+
+database "Aiven Cloud MySQL (db_TalkStep)" {
+    folder "Tables" {
+        entity "itinerary" as tbl_itinerary
+        entity "module_topic" as tbl_module_topic
+        entity "lesson" as tbl_lesson
+        entity "chat_message" as tbl_chat_message
+        entity "material" as tbl_material
+        entity "material_chunk" as tbl_material_chunk
+    }
+}
+
+' Relacionamentos do Frontend para Controllers
+ChatWebInterface ..> ChatController : HTTP REST /api/chat
+ChatWebInterface ..> LessonController : HTTP REST /api/lessons
+
+' Controllers para Services
+ChatController --> TutorEngineService : delegates
+LessonController --> TutorEngineService : delegates
+MaterialController --> RagVectorService : delegates
+
+' Services para Repositories
+TutorEngineService --> LessonRepository : uses
+TutorEngineService --> ChatMessageRepository : uses
+RagVectorService --> MaterialRepository : uses
+RagVectorService --> MaterialChunkRepository : uses
+
+' Services para Serviços Auxiliares
+TutorEngineService ..> SpeechService : STT/TTS
+TutorEngineService ..> RagVectorService : RAG Context
+
+' Repositories operam sobre o MySQL na Aiven Cloud e Mapeiam as Entidades
+LessonRepository ..> tbl_lesson : CRUD
+ChatMessageRepository ..> tbl_chat_message : CRUD
+MaterialRepository ..> tbl_material : CRUD
+MaterialChunkRepository ..> tbl_material_chunk : CRUD / Vector Search
+
+' DB Browser gerencia a database na Aiven Cloud
+IntelliJ_DB_Browser ..> "Aiven Cloud MySQL (db_TalkStep)" : Direct SSL Connection (JDBC)
+
+@enduml

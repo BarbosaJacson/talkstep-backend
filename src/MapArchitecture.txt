@@ -1,0 +1,34 @@
+com.talkstep.api/
+├── controller/
+│   ├── ChatController.java
+│   ├── LessonController.java
+│   └── MaterialController.java
+├── dto/
+│   ├── request/
+│   │   └── ChatMessageRequestDTO.java
+│   └── response/
+│       ├── ChatMessageResponseDTO.java
+│       └── LessonSummaryDTO.java
+├── domain/
+│   ├── entity/
+│   │   ├── Itinerary.java
+│   │   ├── ModuleTopic.java
+│   │   ├── Lesson.java
+│   │   ├── ChatMessage.java
+│   │   ├── Material.java
+│   │   └── MaterialChunk.java
+│   └── enums/
+│       ├── CefrLevel.java
+│       ├── LessonStatus.java
+│       └── SenderType.java
+├── repository/
+│   ├── ItineraryRepository.java
+│   ├── LessonRepository.java
+│   ├── ChatMessageRepository.java
+│   ├── MaterialRepository.java
+│   └── MaterialChunkRepository.java
+├── service/
+│   ├── TutorEngineService.java
+│   ├── RagVectorService.java
+│   └── SpeechService.java
+└── TalkstepApplication.java

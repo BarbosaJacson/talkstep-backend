@@ -4,18 +4,242 @@
     <mappings />
     <preferences />
   </component>
+  <component name="DBNavigator.Project.DataEditorManager">
+    <record-view-column-sorting-type value="BY_INDEX" />
+    <value-preview-text-wrapping value="true" />
+    <value-preview-pinned value="false" />
+  </component>
   <component name="DBNavigator.Project.DatabaseAssistantManager">
-    <assistants />
+    <assistants>
+      <assistant-state connection-id="6ac51654-fc7d-423b-bde6-94e563db7836" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="" availability="AVAILABLE" acknowledgement="NONE" selected="true">
+        <tools />
+        <mcp-servers />
+      </assistant-state>
+      <assistant-state connection-id="6ac51654-fc7d-423b-bde6-94e563db7836" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
+        <tools />
+        <mcp-servers />
+      </assistant-state>
+    </assistants>
     <selection-state>
       <model-selection />
     </selection-state>
   </component>
+  <component name="DBNavigator.Project.DatabaseBrowserManager">
+    <autoscroll-to-editor value="false" />
+    <autoscroll-from-editor value="true" />
+    <show-object-properties value="false" />
+    <loaded-nodes />
+  </component>
+  <component name="DBNavigator.Project.DatabaseConsoleManager">
+    <connection id="6ac51654-fc7d-423b-bde6-94e563db7836">
+      <console name="TalkStep" type="STANDARD" schema="db_TalkStep" session="Main" />
+      <console name="TalkStep 1" type="STANDARD" schema="db_TalkStep" session="Main"><![CDATA[USE db_TalkStep;
+
+-- 1. Table for Learning Itineraries (Study Plans)
+CREATE TABLE IF NOT EXISTS itinerary (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    description TEXT,
+    target_level VARCHAR(20) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Table for Modules and Topics within an Itinerary
+CREATE TABLE IF NOT EXISTS module_topic (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    itinerary_id BIGINT NOT NULL,
+    order_index INT NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    grammar_focus VARCHAR(255),
+    vocabulary_focus VARCHAR(255),
+    CONSTRAINT fk_module_itinerary FOREIGN KEY (itinerary_id) REFERENCES itinerary(id) ON DELETE CASCADE
+);
+
+-- 3. Table for Individual Lessons / Study Sessions
+CREATE TABLE IF NOT EXISTS lesson (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    topic_id BIGINT NOT NULL,
+    lesson_number INT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PLANNED',
+    previous_lesson_summary TEXT,
+    current_topic_summary TEXT,
+    weak_points_notes TEXT,
+    started_at DATETIME,
+    ended_at DATETIME,
+    CONSTRAINT fk_lesson_topic FOREIGN KEY (topic_id) REFERENCES module_topic(id)
+);
+
+-- 4. Table for Chat Messages (Lesson Conversation History)
+CREATE TABLE IF NOT EXISTS chat_message (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    lesson_id BIGINT NOT NULL,
+    sender VARCHAR(20) NOT NULL,
+    text_content TEXT NOT NULL,
+    grammar_corrections TEXT,
+    audio_url VARCHAR(255),
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_chat_lesson FOREIGN KEY (lesson_id) REFERENCES lesson(id) ON DELETE CASCADE
+);
+
+-- 5. Table for Educational PDF Materials
+CREATE TABLE IF NOT EXISTS material (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    processed TINYINT(1) DEFAULT 0,
+    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 6. Table for Vector Embeddings and Text Chunks for RAG (Spring AI / MySQL)
+CREATE TABLE IF NOT EXISTS material_chunk (
+    id VARCHAR(36) PRIMARY KEY,
+    material_id BIGINT,
+    content TEXT NOT NULL,
+    metadata JSON,
+    embedding TEXT,
+    CONSTRAINT fk_chunk_material FOREIGN KEY (material_id) REFERENCES material(id) ON DELETE CASCADE
+);]]></console>
+    </connection>
+  </component>
+  <component name="DBNavigator.Project.DatabaseEditorStateManager">
+    <last-used-providers />
+  </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files />
   </component>
+  <component name="DBNavigator.Project.DatabasePrerequisiteManager">
+    <prerequisites />
+  </component>
+  <component name="DBNavigator.Project.DatabaseSessionManager">
+    <connection id="6ac51654-fc7d-423b-bde6-94e563db7836" />
+  </component>
+  <component name="DBNavigator.Project.ExecutionManager">
+    <retain-sticky-names value="false" />
+  </component>
+  <component name="DBNavigator.Project.ObjectQuickFilterManager">
+    <last-used-operator value="EQUAL" />
+    <filters />
+  </component>
   <component name="DBNavigator.Project.Settings">
-    <states />
-    <connections />
+    <states>
+      <state category="SECRET_STORAGE_MIGRATION">
+        <migrated value="true" />
+      </state>
+    </states>
+    <connections>
+      <connection source-id="" id="6ac51654-fc7d-423b-bde6-94e563db7836" active="true" signed="true">
+        <database>
+          <name value="TalkStep" />
+          <description value="" />
+          <database-type value="MYSQL" />
+          <config-type value="BASIC" />
+          <database-version value="8.4" />
+          <driver-source value="BUNDLED" />
+          <driver-library value="" />
+          <driver value="" />
+          <url-type value="CUSTOM" />
+          <url value="jdbc:mysql://mysql-1a53f616-barbosajacson-3a9f.f.aivencloud.com:24342/db_TalkStep?useSSL=true&amp;sslMode=REQUIRED&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=America/Sao_Paulo" />
+          <type value="USER_PASSWORD" />
+          <user value="avnadmin" />
+          <token-type value="" />
+          <token-config-file value="" />
+          <token-profile value="" />
+          <adb-compartment-ocid value="" />
+          <adb-database-ocid value="" />
+          <azure-token-database-id-uri value="" />
+          <azure-token-tenant-id value="" />
+          <azure-token-client-id value="" />
+          <azure-token-client-certificate-file value="" />
+          <session-user value="avnadmin@179.54.103.201" />
+        </database>
+        <properties>
+          <auto-commit value="false" />
+        </properties>
+        <ssh-settings>
+          <active value="false" />
+          <proxy-host value="" />
+          <proxy-port value="22" />
+          <proxy-user value="" />
+          <auth-type value="PASSWORD" />
+          <key-file value="" />
+        </ssh-settings>
+        <ssl-settings>
+          <active value="false" />
+          <certificate-authority-file value="" />
+          <client-certificate-file value="" />
+          <client-key-file value="" />
+        </ssl-settings>
+        <details>
+          <charset value="UTF-8" />
+          <session-management value="true" />
+          <ddl-file-binding value="true" />
+          <database-logging value="true" />
+          <connect-automatically value="true" />
+          <restore-workspace value="true" />
+          <restore-workspace-deep value="false" />
+          <environment-type value="default" />
+          <connectivity-timeout value="30" />
+          <idle-time-to-disconnect value="30" />
+          <idle-time-to-disconnect-pool value="5" />
+          <credential-expiry-time value="10" />
+          <max-connection-pool-size value="7" />
+          <alternative-statement-delimiter value="" />
+        </details>
+        <debugger>
+          <compile-dependencies value="true" />
+          <tcp-host-address value="" />
+          <tcp-port-from value="4000" />
+          <tcp-port-to value="4999" />
+          <jdwp-tunnel-type value="NONE" />
+          <debugger-type value="ASK" />
+          <reverse-ssh-tunnel>
+            <host value="" />
+            <port value="22" />
+            <bind-host value="127.0.0.1" />
+            <bind-port value="0" />
+            <auth-type value="PASSWORD" />
+            <user value="" />
+            <key-file value="" />
+          </reverse-ssh-tunnel>
+        </debugger>
+        <object-filters hide-empty-schemas="false" hide-pseudo-columns="false" hide-audit-columns="false">
+          <object-filters />
+          <object-type-filter use-master-settings="true">
+            <object-type name="ROLE" enabled="true" />
+            <object-type name="PRIVILEGE" enabled="true" />
+            <object-type name="CHARSET" enabled="true" />
+            <object-type name="TABLE" enabled="true" />
+            <object-type name="VIEW" enabled="true" />
+            <object-type name="JSON_VIEW" enabled="true" />
+            <object-type name="MATERIALIZED_VIEW" enabled="true" />
+            <object-type name="NESTED_TABLE" enabled="true" />
+            <object-type name="COLUMN" enabled="true" />
+            <object-type name="INDEX" enabled="true" />
+            <object-type name="CONSTRAINT" enabled="true" />
+            <object-type name="DATASET_TRIGGER" enabled="true" />
+            <object-type name="DATABASE_TRIGGER" enabled="true" />
+            <object-type name="SYNONYM" enabled="true" />
+            <object-type name="SEQUENCE" enabled="true" />
+            <object-type name="PROCEDURE" enabled="true" />
+            <object-type name="FUNCTION" enabled="true" />
+            <object-type name="PACKAGE" enabled="true" />
+            <object-type name="TYPE" enabled="true" />
+            <object-type name="TYPE_ATTRIBUTE" enabled="true" />
+            <object-type name="ARGUMENT" enabled="true" />
+            <object-type name="JAVA_CLASS" enabled="true" />
+            <object-type name="JAVA_FIELD" enabled="true" />
+            <object-type name="JAVA_METHOD" enabled="true" />
+            <object-type name="JAVA_RESOURCE" enabled="true" />
+            <object-type name="DIMENSION" enabled="true" />
+            <object-type name="CLUSTER" enabled="true" />
+            <object-type name="DBLINK" enabled="true" />
+            <object-type name="CREDENTIAL" enabled="true" />
+            <object-type name="AI_PROFILE" enabled="true" />
+            <object-type name="AI_MODEL" enabled="true" />
+          </object-type-filter>
+        </object-filters>
+      </connection>
+    </connections>
     <browser-settings>
       <general>
         <display-mode value="TABBED" />
@@ -467,5 +691,9 @@
         </visibility-settings>
       </environment>
     </general-settings>
+  </component>
+  <component name="DBNavigator.Project.StatementExecutionManager">
+    <execution-variables />
+    <execution-variable-types />
   </component>
 </project>
