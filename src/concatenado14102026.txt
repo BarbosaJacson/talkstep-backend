@@ -1,0 +1,480 @@
+================================================================================
+                    TALKSTEP - CONTEXTO E PROPRIEDADES DO PROJETO
+================================================================================
+
+1. VISÃO GERAL DO PROJETO
+--------------------------------------------------------------------------------
+- Nome do Projeto: TalkStep
+- Objetivo: Plataforma de ensino de inglês orientada por IA (Tutor Inteligente + RAG + STT/TTS + Google OAuth 2.0).
+- Tecnologias: Java 21+, Spring Boot 3.2.5, Spring Data JPA, MySQL (Aiven Cloud), Maven.
+- Padrão de Projeto: Clean Architecture / DDD (Domain-Driven Design).
+- Estilo de Desenvolvimento: Aprendizado guiado (Skeletons/Instruções -> Implementação pelo Desenvolvedor -> Validação/Revisão).
+- Padrão de Código: Comentários e Javadoc estritamente em Inglês.
+
+2. BANCO DE DADOS (AIVEN CLOUD MYSQL)
+--------------------------------------------------------------------------------
+- Host: Cloud Instance Aiven
+- Database: db_TalkStep
+- Tabelas Criadas / Mapeadas (7):
+  1. user            (Implementada & Validada - Cadastro/Auth via Google)
+  2. itinerary       (Implementada & Validada)
+  3. module_topic    (Implementada & Validada)
+  4. lesson          (Em andamento)
+  5. chat_message    (Pendente)
+  6. material        (Pendente)
+  7. material_chunk  (Pendente)
+
+3. ESTRUTURA DE PACOTES E ARQUITETURA DE CÓDIGO
+--------------------------------------------------------------------------------
+com.talkstep.api
+├── domain/
+│   ├── entity/
+│   │   ├── User.java              (Implementada & Validada)
+│   │   ├── Itinerary.java         (Implementada & Validada - Vincular a User)
+│   │   ├── ModuleTopic.java       (Implementada & Validada)
+│   │   ├── Lesson.java            (Em andamento)
+│   │   ├── ChatMessage.java       (Pendente)
+│   │   ├── Material.java          (Pendente)
+│   │   └── MaterialChunk.java     (Pendente)
+│   └── enums/
+│       ├── CefrLevel.java         (Implementada & Validada)
+│       ├── LessonStatus.java      (Implementada & Validada)
+│       ├── SenderType.java        (Implementada & Validada)
+│       └── AuthProvider.java      (Implementada & Validada)
+├── repository/                    (Pendente)
+├── service/                       (Pendente)
+└── controller/                    (Pendente)
+
+4. CÓDIGO FONTE IMPLEMENTADO E VALIDADO
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+[ENUM] com.talkstep.api.domain.enums.AuthProvider
+--------------------------------------------------------------------------------
+package com.talkstep.api.domain.enums;
+
+/**
+ * Identifies the authentication provider used by a registered user.
+ */
+public enum AuthProvider {
+    LOCAL,
+    GOOGLE
+}
+
+--------------------------------------------------------------------------------
+[ENUM] com.talkstep.api.domain.enums.CefrLevel
+--------------------------------------------------------------------------------
+package com.talkstep.api.domain.enums;
+
+/**
+ * Represents the Common European Framework of Reference for Languages (CEFR) levels.
+ */
+public enum CefrLevel {
+    A1_BEGINNER,
+    A2_ELEMENTARY,
+    B1_INTERMEDIATE,
+    B2_UPPER_INTERMEDIATE,
+    C1_ADVANCED,
+    C2_PROFICIENT
+}
+
+--------------------------------------------------------------------------------
+[ENUM] com.talkstep.api.domain.enums.LessonStatus
+--------------------------------------------------------------------------------
+package com.talkstep.api.domain.enums;
+
+/**
+ * Tracks the current lifecycle status of an English learning session.
+ */
+public enum LessonStatus {
+    PLANNED,
+    IN_PROGRESS,
+    COMPLETED,
+    CANCELLED
+}
+
+--------------------------------------------------------------------------------
+[ENUM] com.talkstep.api.domain.enums.SenderType
+--------------------------------------------------------------------------------
+package com.talkstep.api.domain.enums;
+
+/**
+ * Identifies the origin/sender of a chat message within a study session.
+ */
+public enum SenderType {
+    USER,
+    TUTOR,
+    SYSTEM
+}
+
+--------------------------------------------------------------------------------
+[ENTITY] com.talkstep.api.domain.entity.User
+--------------------------------------------------------------------------------
+package com.talkstep.api.domain.entity;
+
+import com.talkstep.api.domain.enums.AuthProvider;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Represents a registered user within the system with Google OAuth support.
+ */
+@Entity
+@Table(name = "user")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 150)
+    private String name;
+
+    @Column(nullable = false, unique = true, length = 150)
+    private String email;
+
+    @Column(name = "google_id", unique = true)
+    private String googleId;
+
+    @Column(name = "picture_url")
+    private String pictureUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider", nullable = false, length = 20)
+    private AuthProvider authProvider;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Itinerary> itineraries = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public User() {
+    }
+
+    public User(String name, String email, String googleId, String pictureUrl, AuthProvider authProvider) {
+        this.name = name;
+        this.email = email;
+        this.googleId = googleId;
+        this.pictureUrl = pictureUrl;
+        this.authProvider = authProvider;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
+    }
+
+    public String getPictureUrl() {
+        return pictureUrl;
+    }
+
+    public void setPictureUrl(String pictureUrl) {
+        this.pictureUrl = pictureUrl;
+    }
+
+    public AuthProvider getAuthProvider() {
+        return authProvider;
+    }
+
+    public void setAuthProvider(AuthProvider authProvider) {
+        this.authProvider = authProvider;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public List<Itinerary> getItineraries() {
+        return itineraries;
+    }
+
+    public void setItineraries(List<Itinerary> itineraries) {
+        this.itineraries = itineraries;
+    }
+
+    public void addItinerary(Itinerary itinerary) {
+        itineraries.add(itinerary);
+        itinerary.setUser(this);
+    }
+
+    public void removeItinerary(Itinerary itinerary) {
+        itineraries.remove(itinerary);
+        itinerary.setUser(null);
+    }
+}
+
+--------------------------------------------------------------------------------
+[ENTITY] com.talkstep.api.domain.entity.Itinerary
+--------------------------------------------------------------------------------
+package com.talkstep.api.domain.entity;
+
+import com.talkstep.api.domain.enums.CefrLevel;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Represents a personalized learning itinerary (study plan) tailored to a specific target level.
+ */
+@Entity
+@Table(name = "itinerary")
+public class Itinerary {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Column(nullable = false, length = 150)
+    private String title;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "target_level", nullable = false, length = 20)
+    private CefrLevel targetLevel;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "itinerary", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ModuleTopic> topics = new ArrayList<>();
+
+    public Itinerary() {
+    }
+
+    public Itinerary(User user, String title, String description, CefrLevel targetLevel) {
+        this.user = user;
+        this.title = title;
+        this.description = description;
+        this.targetLevel = targetLevel;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public CefrLevel getTargetLevel() {
+        return targetLevel;
+    }
+
+    public void setTargetLevel(CefrLevel targetLevel) {
+        this.targetLevel = targetLevel;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public List<ModuleTopic> getTopics() {
+        return topics;
+    }
+
+    public void setTopics(List<ModuleTopic> topics) {
+        this.topics = topics;
+    }
+
+    public void addTopic(ModuleTopic topic) {
+        topics.add(topic);
+        topic.setItinerary(this);
+    }
+
+    public void removeTopic(ModuleTopic topic) {
+        topics.remove(topic);
+        topic.setItinerary(null);
+    }
+}
+
+--------------------------------------------------------------------------------
+[ENTITY] com.talkstep.api.domain.entity.ModuleTopic
+--------------------------------------------------------------------------------
+package com.talkstep.api.domain.entity;
+
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Represents a specific module/topic within a learning itinerary focusing on grammar and vocabulary.
+ */
+@Entity
+@Table(name = "module_topic")
+public class ModuleTopic {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "itinerary_id", nullable = false)
+    private Itinerary itinerary;
+
+    @Column(name = "order_index", nullable = false)
+    private Integer orderIndex;
+
+    @Column(nullable = false, length = 150)
+    private String title;
+
+    @Column(name = "grammar_focus")
+    private String grammarFocus;
+
+    @Column(name = "vocabulary_focus")
+    private String vocabularyFocus;
+
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Lesson> lessons = new ArrayList<>();
+
+    public ModuleTopic() {
+    }
+
+    public ModuleTopic(Itinerary itinerary, Integer orderIndex, String title, String grammarFocus, String vocabularyFocus, List<Lesson> lessons) {
+        this.itinerary = itinerary;
+        this.orderIndex = orderIndex;
+        this.title = title;
+        this.grammarFocus = grammarFocus;
+        this.vocabularyFocus = vocabularyFocus;
+        this.lessons = lessons;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Itinerary getItinerary() {
+        return itinerary;
+    }
+
+    public void setItinerary(Itinerary itinerary) {
+        this.itinerary = itinerary;
+    }
+
+    public Integer getOrderIndex() {
+        return orderIndex;
+    }
+
+    public void setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getGrammarFocus() {
+        return grammarFocus;
+    }
+
+    public void setGrammarFocus(String grammarFocus) {
+        this.grammarFocus = grammarFocus;
+    }
+
+    public String getVocabularyFocus() {
+        return vocabularyFocus;
+    }
+
+    public void setVocabularyFocus(String vocabularyFocus) {
+        this.vocabularyFocus = vocabularyFocus;
+    }
+
+    public List<Lesson> getLessons() {
+        return lessons;
+    }
+
+    public void setLessons(List<Lesson> lessons) {
+        this.lessons = lessons;
+    }
+}
+
+5. PRÓXIMO PASSO IMEDIATO
+--------------------------------------------------------------------------------
+- Implementar a classe `Lesson.java` em `com.talkstep.api.domain.entity`.
+================================================================================

@@ -9,9 +9,17 @@ package "Frontend (Celular / PWA - HTML5 & JS)" {
     class ChatWebInterface {
         - MediaRecorder audioRecorder
         - AudioContext audioPlayer
+        + void loginWithGoogle()
         + void recordAndSendVoice()
         + void sendTextMessage(String text)
         + void renderChatMessage(ChatMessageDTO msg)
+    }
+}
+
+package "External Services" {
+    class GoogleOAuth2Server {
+        + TokenResponse exchangeCodeForToken(String authCode)
+        + GoogleUserInfo fetchUserInfo(String accessToken)
     }
 }
 
@@ -26,6 +34,10 @@ package "Developer Environment" {
 package "com.talkstep.api" {
 
     package "controller" {
+        class AuthController {
+            + ResponseEntity<AuthResponseDTO> googleLogin(GoogleAuthRequestDTO request)
+        }
+
         class ChatController {
             + ResponseEntity<ChatMessageDTO> sendMessage(Long lessonId, String text)
             + ResponseEntity<ChatMessageDTO> sendVoiceMessage(Long lessonId, MultipartFile audio)
@@ -43,6 +55,11 @@ package "com.talkstep.api" {
     }
 
     package "service" {
+        class AuthService {
+            + User processGoogleOAuthUser(String googleIdToken)
+            + String generateJwtToken(User user)
+        }
+
         class TutorEngineService {
             + ChatMessage processUserMessage(Long lessonId, String userInput)
             + String generateLessonSummary(Long lessonId)
@@ -60,6 +77,7 @@ package "com.talkstep.api" {
     }
 
     package "repository" {
+        interface UserRepository
         interface LessonRepository
         interface ChatMessageRepository
         interface MaterialRepository
@@ -68,6 +86,7 @@ package "com.talkstep.api" {
     }
 
     package "domain.entity" {
+        class User
         class Itinerary
         class ModuleTopic
         class Lesson
@@ -80,11 +99,13 @@ package "com.talkstep.api" {
         enum CefrLevel
         enum LessonStatus
         enum SenderType
+        enum AuthProvider
     }
 }
 
 database "Aiven Cloud MySQL (db_TalkStep)" {
     folder "Tables" {
+        entity "user" as tbl_user
         entity "itinerary" as tbl_itinerary
         entity "module_topic" as tbl_module_topic
         entity "lesson" as tbl_lesson
@@ -94,14 +115,25 @@ database "Aiven Cloud MySQL (db_TalkStep)" {
     }
 }
 
-' Relacionamentos do Frontend para Controllers
+' Relacionamentos do Frontend para Controllers e External OAuth
+ChatWebInterface ..> GoogleOAuth2Server : Redirect / OAuth2 Flow
+ChatWebInterface ..> AuthController : POST /api/auth/google
 ChatWebInterface ..> ChatController : HTTP REST /api/chat
 ChatWebInterface ..> LessonController : HTTP REST /api/lessons
 
 ' Controllers para Services
+AuthController --> AuthService : delegates
 ChatController --> TutorEngineService : delegates
 LessonController --> TutorEngineService : delegates
 MaterialController --> RagVectorService : delegates
+
+' Auth Service com Google OAuth Provider
+AuthService ..> GoogleOAuth2Server : Validate ID Token
+AuthService --> UserRepository : CRUD (find/create user)
+
+' Relacionamento da entidade User no Banco
+tbl_user "1" -- "N" tbl_itinerary : owns
+tbl_user "1" -- "N" tbl_lesson : executes
 
 ' Services para Repositories
 TutorEngineService --> LessonRepository : uses
@@ -114,6 +146,7 @@ TutorEngineService ..> SpeechService : STT/TTS
 TutorEngineService ..> RagVectorService : RAG Context
 
 ' Repositories operam sobre o MySQL na Aiven Cloud e Mapeiam as Entidades
+UserRepository ..> tbl_user : CRUD
 LessonRepository ..> tbl_lesson : CRUD
 ChatMessageRepository ..> tbl_chat_message : CRUD
 MaterialRepository ..> tbl_material : CRUD

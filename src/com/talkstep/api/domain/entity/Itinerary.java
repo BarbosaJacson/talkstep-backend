@@ -14,6 +14,9 @@ public class Itinerary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
     @Column(nullable = false, length = 150)
     private String title;
     @Column(columnDefinition = "TEXT")
@@ -29,12 +32,20 @@ public class Itinerary {
     public Itinerary() {
     }
 
-
-    public Itinerary(String title, String description, CefrLevel targetLevel) {
+    public Itinerary(User user, String title, String description, CefrLevel targetLevel) {
+        this.user = user;
         this.title = title;
         this.description = description;
         this.targetlevel = targetLevel;
 
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getTitle() {
