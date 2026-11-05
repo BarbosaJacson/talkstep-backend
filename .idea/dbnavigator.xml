@@ -150,7 +150,7 @@ CREATE TABLE IF NOT EXISTS material_chunk (
           <azure-token-tenant-id value="" />
           <azure-token-client-id value="" />
           <azure-token-client-certificate-file value="" />
-          <session-user value="avnadmin@179.54.103.201" />
+          <session-user value="avnadmin@179.54.103.31" />
         </database>
         <properties>
           <auto-commit value="false" />
