@@ -1,7 +1,7 @@
-package com.talkstep.api.domain.entity;
+package domain.entity;
 
 import jakarta.persistence.*;
-import com.talkstep.api.domain.enums.CefrLevel;
+import domain.enums.CefrLevel;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

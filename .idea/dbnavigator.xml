@@ -6,7 +6,7 @@
   </component>
   <component name="DBNavigator.Project.DataEditorManager">
     <record-view-column-sorting-type value="BY_INDEX" />
-    <value-preview-text-wrapping value="true" />
+    <value-preview-text-wrapping value="false" />
     <value-preview-pinned value="false" />
   </component>
   <component name="DBNavigator.Project.DatabaseAssistantManager">
@@ -113,6 +113,13 @@ CREATE TABLE IF NOT EXISTS material_chunk (
   <component name="DBNavigator.Project.DatabaseSessionManager">
     <connection id="6ac51654-fc7d-423b-bde6-94e563db7836" />
   </component>
+  <component name="DBNavigator.Project.DatasetFilterManager">
+    <filter-actions connection-id="6ac51654-fc7d-423b-bde6-94e563db7836" dataset="db_TalkStep.chat_message" active-filter-id="51a78f06-a664-4261-aa69-2e22c678708f">
+      <filter id="51a78f06-a664-4261-aa69-2e22c678708f" name="Filter" temporary="false" custom-name="false" type="basic" join-type="AND">
+        <condition column="id" operator="=" value="" active="true" />
+      </filter>
+    </filter-actions>
+  </component>
   <component name="DBNavigator.Project.ExecutionManager">
     <retain-sticky-names value="false" />
   </component>
@@ -150,7 +157,7 @@ CREATE TABLE IF NOT EXISTS material_chunk (
           <azure-token-tenant-id value="" />
           <azure-token-client-id value="" />
           <azure-token-client-certificate-file value="" />
-          <session-user value="avnadmin@179.54.103.31" />
+          <session-user value="avnadmin@179.54.100.235" />
         </database>
         <properties>
           <auto-commit value="false" />

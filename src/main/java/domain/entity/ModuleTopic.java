@@ -1,8 +1,9 @@
-package com.talkstep.api.domain.entity;
+package domain.entity;
 
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "module_topic")

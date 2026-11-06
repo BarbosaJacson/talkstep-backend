@@ -1,4 +1,4 @@
-package com.talkstep.api.domain.enums;
+package domain.enums;
 
 public enum AuthProvider {
     LOCAL,
