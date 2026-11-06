@@ -32,7 +32,17 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="6ac51654-fc7d-423b-bde6-94e563db7836">
-      <console name="TalkStep" type="STANDARD" schema="db_TalkStep" session="Main" />
+      <console name="TalkStep" type="STANDARD" schema="db_TalkStep" session="Main"><![CDATA[USE db_TalkStep;
+
+CREATE TABLE IF NOT EXISTS user (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    google_id VARCHAR(255) UNIQUE,
+    picture_url VARCHAR(255),
+    auth_provider VARCHAR(20) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);]]></console>
       <console name="TalkStep 1" type="STANDARD" schema="db_TalkStep" session="Main"><![CDATA[USE db_TalkStep;
 
 -- 1. Table for Learning Itineraries (Study Plans)
@@ -105,7 +115,9 @@ CREATE TABLE IF NOT EXISTS material_chunk (
     <last-used-providers />
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files />
+    <open-files>
+      <object connection-id="6ac51654-fc7d-423b-bde6-94e563db7836" object-ref="consoles/TalkStep" />
+    </open-files>
   </component>
   <component name="DBNavigator.Project.DatabasePrerequisiteManager">
     <prerequisites />
