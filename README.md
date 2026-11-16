@@ -93,6 +93,8 @@ A API estará disponível em http://localhost:8080.
 
 ---
 
+---
+
 ### 👨‍💻 Desenvolvido por Jacson Barbosa
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/jacson-barbosa-7a080a308/)
